@@ -24,7 +24,7 @@
         Write-Output "There were no updates for any of the Jenkins plugins!"
     } Else {
         Write-Output "Restarting Jenkins"
-        java -jar jenkins-cli.jar -s $jenkinsServer safe-restart | Write-Output
+        java -jar jenkins-cli.jar -s $jenkinsServer restart | Write-Output
     }
 }
 
