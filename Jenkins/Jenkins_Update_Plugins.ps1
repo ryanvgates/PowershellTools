@@ -7,7 +7,7 @@
     java -jar jenkins-cli.jar -s $jenkinsServer -i $sshKeyPath list-plugins | Tee-Object -Variable output 
 
     foreach ($item in $output) {
-        If ($item -match '\([\d\.\-b]+\)') {
+        If ($item -match '\([\d\.\-brc]+\)') {
             $name = Select-String -InputObject $item -Pattern '[\w-]+' | %{$_.Matches} | %{$_.Value}
             $pluginsToBeUpdated += $name
             Write-Output "Going to update $name"
