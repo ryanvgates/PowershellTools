@@ -1,10 +1,11 @@
-﻿Function Update-Plugins($jenkinsServer, $sshKeyPath) {
+﻿Function Update-Plugins($jenkinsServer, $username, $authToken) {
+    $authValue = $($username+":"+$authtoken)
     $pluginsToBeUpdated = @()
     Invoke-RestMethod -Method Get -Uri $($jenkinsServer + "/jnlpJars/jenkins-cli.jar") -OutFile "jenkins-cli.jar" -ContentType "application/octet-stream"
 
     Write-Output "`nHere are the currently installed plugins`n"
 
-    java -jar jenkins-cli.jar -s $jenkinsServer -i $sshKeyPath list-plugins | Tee-Object -Variable output 
+    cmd /c java -jar jenkins-cli.jar -s $jenkinsServer -auth $authValue list-plugins '2>&1' | Tee-Object -Variable output 
 
     foreach ($item in $output) {
         If ($item -match '\([\d\.\-brc]+\)') {
@@ -17,18 +18,18 @@
     Write-Output "`r`n"
 
     $pluginsToBeUpdated | ForEach {
-        java -jar jenkins-cli.jar -s $jenkinsServer -i $sshKeyPath install-plugin $($_) -deploy | Write-Output
+        cmd /c java -jar jenkins-cli.jar -s $jenkinsServer -auth $authValue install-plugin $($_) -deploy '2>&1' | Write-Output
     }
 
     If ($pluginsToBeUpdated.Count -eq 0){
         Write-Output "There were no updates for any of the Jenkins plugins!"
     } Else {
         Write-Output "Restarting Jenkins"
-        java -jar jenkins-cli.jar -s $jenkinsServer restart | Write-Output
+        cmd /c java -jar jenkins-cli.jar -s $jenkinsServer -auth $authValue restart '2>&1' | Write-Output
     }
 }
 
-$results = Update-Plugins -jenkinsServer "http://jenkins:1234" -sshKeyPath "C:\Users\jenkins\.ssh\id_rsa"
+$results = Update-Plugins -jenkinsServer "http://jenkins:1234" -username "user" -authToken "123456789"
 
 $to = "recipient@mail.com"
 $subject = "Updating Jenkins results for $(Get-Date -Format g)"
